@@ -1,0 +1,13 @@
+[package]
+name = "vm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fabric-storage = { path = "../storage" }
+
+bcs.workspace = true
+move-vm-runtime.workspace = true
+move-core-types.workspace = true
+move-vm-types.workspace = true
+serde.workspace = true
