@@ -288,10 +288,21 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "bcs",
+ "fabric-types",
  "move-core-types",
  "move-vm-runtime",
  "serde",
  "sled",
+]
+
+[[package]]
+name = "fabric-types"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bcs",
+ "move-core-types",
+ "serde",
 ]
 
 [[package]]

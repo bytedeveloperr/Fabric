@@ -1,16 +1,13 @@
 [package]
-name = "fabric-storage"
+name = "fabric-types"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-sled = "0.34.7"
 
 bcs.workspace = true
-move-vm-runtime.workspace = true
 move-core-types.workspace = true
 serde.workspace = true
 
 anyhow = "1.0.75"
-fabric-types = { path = "../types" }
 
