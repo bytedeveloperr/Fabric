@@ -1,6 +1,6 @@
 use crate::account_state::AccountState;
 
-#[derive(Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct RawAccountState {
     pub state: Vec<u8>,
 }

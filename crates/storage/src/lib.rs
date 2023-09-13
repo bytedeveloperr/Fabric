@@ -1,8 +1,8 @@
+pub mod data_cache;
 pub mod db;
+pub mod reader;
 pub mod resolver;
-pub mod state;
-pub mod storage;
-pub mod store;
+pub mod stores;
 
 #[cfg(test)]
 pub mod tests;

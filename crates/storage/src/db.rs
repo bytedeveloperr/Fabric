@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::store::{KeyCodec, Store, ValueCodec};
+use crate::stores::{KeyCodec, Store, ValueCodec};
 use anyhow::{Ok, Result};
 
 pub struct DB {

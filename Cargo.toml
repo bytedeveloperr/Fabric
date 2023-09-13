@@ -1,11 +1,15 @@
 [workspace]
 resolver = "2"
-members = ["crates/*"]
+members = ["crates/storage",'crates/types']
 
 [workspace.dependencies]
 bcs = "0.1.5"
 serde = { version = "1.0.188", features = ["derive"] }
 
+move-binary-format = { git = "https://github.com/move-language/move", rev = "ea70797099baea64f05194a918cebd69ed02b285" }
 move-vm-runtime = { git = "https://github.com/move-language/move", rev = "ea70797099baea64f05194a918cebd69ed02b285" }
-move-core-types = { git = "https://github.com/move-language/move", rev = "ea70797099baea64f05194a918cebd69ed02b285" }
+move-core-types = { git = "https://github.com/move-language/move", rev = "ea70797099baea64f05194a918cebd69ed02b285", features = ["address32"] }
 move-vm-types = { git = "https://github.com/move-language/move", rev = "ea70797099baea64f05194a918cebd69ed02b285" }
+move-compiler = { git = "https://github.com/move-language/move", rev = "ea70797099baea64f05194a918cebd69ed02b285" }
+move-stdlib = { git = "https://github.com/move-language/move", rev = "ea70797099baea64f05194a918cebd69ed02b285" }
+# fastcrypto = { git = "https://github.com/MystenLabs/fastcrypto.git", rev = "6d4da5715a15a47ff215c230f0edc48c2f34e065" }

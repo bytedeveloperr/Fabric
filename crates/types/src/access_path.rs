@@ -4,7 +4,7 @@ use move_core_types::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Clone)]
 pub struct AccessPath {
     pub address: AccountAddress,
     pub path: Vec<u8>,

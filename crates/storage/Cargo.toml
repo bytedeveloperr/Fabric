@@ -7,10 +7,15 @@ edition = "2021"
 sled = "0.34.7"
 
 bcs.workspace = true
+move-binary-format.workspace = true
 move-vm-runtime.workspace = true
 move-core-types.workspace = true
+move-vm-types.workspace = true
+move-compiler.workspace = true
+move-stdlib.workspace = true
 serde.workspace = true
 
 anyhow = "1.0.75"
 fabric-types = { path = "../types" }
+parking_lot = "0.12.1"
 

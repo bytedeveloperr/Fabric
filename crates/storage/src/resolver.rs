@@ -1,33 +1,38 @@
-use crate::state::{FabricState, MoveModule};
-use anyhow::ensure;
+use std::sync::Arc;
+
+use crate::{
+    db::DB,
+    stores::{state::StateStore, Store},
+};
+
+use fabric_types::account_state::AccountState;
 use move_core_types::{
     account_address::AccountAddress,
     language_storage::{ModuleId, StructTag},
     resolver::{ModuleResolver, ResourceResolver},
 };
-use sled::Db;
 
-pub struct FabricResolver {
-    state: FabricState,
+pub struct StateResolver {
+    store: Arc<StateStore>,
 }
 
-impl ModuleResolver for FabricResolver {
+impl ModuleResolver for StateResolver {
     type Error = anyhow::Error;
 
     fn get_module(&self, id: &ModuleId) -> Result<Option<Vec<u8>>, Self::Error> {
-        self.state
-            .resolve_module(id)?
-            .map(|m| {
-                // TODO: Some more validations here
+        let raw_account = self.store.get(id.address())?;
 
-                let module = bcs::from_bytes::<MoveModule>(&m.value).unwrap();
-                Ok(module.byte_code)
-            })
-            .transpose()
+        Ok(match raw_account {
+            Some(raw_account) => {
+                let account_state = AccountState::try_from(&raw_account)?;
+                account_state.get(&id.access_vector()).cloned()
+            }
+            None => None,
+        })
     }
 }
 
-impl ResourceResolver for FabricResolver {
+impl ResourceResolver for StateResolver {
     type Error = anyhow::Error;
 
     fn get_resource(
@@ -35,34 +40,22 @@ impl ResourceResolver for FabricResolver {
         address: &AccountAddress,
         typ: &StructTag,
     ) -> Result<Option<Vec<u8>>, Self::Error> {
-        self.state
-            .resolve_resource(address, typ)?
-            .map(|r| {
-                ensure!(
-                    r.validate_type(typ),
-                    "Resource type mismatch, expected: {:?}, found: {:?}",
-                    r.type_tag,
-                    typ
-                );
-
-                Ok(r.value)
-            })
-            .transpose()
+        let raw_account = self.store.get(address)?.unwrap_or_default();
+        let account_state = AccountState::try_from(&raw_account)?;
+        Ok(account_state.get(&typ.access_vector()).cloned())
     }
 }
 
-impl FabricResolver {
-    pub fn new(db: Db) -> Self {
-        Self {
-            state: FabricState::new(db),
-        }
+impl StateResolver {
+    pub fn new(store: Arc<StateStore>) -> Self {
+        Self { store }
     }
 
     pub fn new_inmemory() -> Self {
-        let db = sled::Config::new().temporary(true).open().unwrap();
+        let db = DB::default();
 
         Self {
-            state: FabricState::new(db),
+            store: Arc::new(StateStore::new(db)),
         }
     }
 }

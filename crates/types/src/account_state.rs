@@ -5,12 +5,16 @@ use std::collections::BTreeMap;
 
 use crate::{access_path::Path, raw_account_state::RawAccountState};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AccountState(pub BTreeMap<Vec<u8>, Vec<u8>>);
+#[derive(Debug, Default, Serialize, Deserialize)]
+pub struct AccountState(BTreeMap<Vec<u8>, Vec<u8>>);
 
 impl AccountState {
     pub fn insert(&mut self, key: Vec<u8>, value: Vec<u8>) -> Option<Vec<u8>> {
         self.0.insert(key, value)
+    }
+
+    pub fn get(&self, key: &[u8]) -> Option<&Vec<u8>> {
+        self.0.get(key)
     }
 
     pub fn remove(&mut self, key: &[u8]) -> Option<Vec<u8>> {
@@ -19,10 +23,6 @@ impl AccountState {
 
     pub fn get_resource<T: MoveResource>(&self) -> Result<Option<T>> {
         self.get_resource_impl(&T::struct_tag().access_vector())
-    }
-
-    pub fn get_module(&self, key: &[u8]) -> Result<Option<Vec<u8>>> {
-        Ok(self.0.get(key).map(|v| v.clone()))
     }
 
     pub fn get_modules(&self) -> impl Iterator<Item = &Vec<u8>> {
