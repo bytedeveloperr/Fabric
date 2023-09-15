@@ -10,20 +10,26 @@ use parking_lot::RwLock;
 
 use crate::stores::{state::StateStore, Store};
 
-pub struct StateReader<'s> {
+pub trait StateReader {
+    fn get(&self, access_path: &AccessPath) -> Result<Option<Vec<u8>>>;
+}
+
+pub struct StoreStateReader<'s> {
     pub store: &'s Arc<StateStore>,
     pub accounts_cache: RwLock<HashMap<AccountAddress, AccountState>>,
 }
 
-impl<'s> StateReader<'s> {
+impl<'s> StoreStateReader<'s> {
     pub fn new(store: &'s Arc<StateStore>) -> Self {
         Self {
             store,
             accounts_cache: RwLock::default(),
         }
     }
+}
 
-    pub fn get(&self, access_path: &AccessPath) -> Result<Option<Vec<u8>>> {
+impl<'s> StateReader for StoreStateReader<'s> {
+    fn get(&self, access_path: &AccessPath) -> Result<Option<Vec<u8>>> {
         let address = access_path.address;
         let path = &access_path.path;
 

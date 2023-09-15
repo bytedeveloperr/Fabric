@@ -7,15 +7,15 @@ use move_core_types::{
 };
 use std::collections::BTreeMap;
 
-use crate::reader::state::StateReader;
+use crate::readers::state::StateReader;
 
-pub struct DataCache<'s> {
-    pub reader: &'s StateReader<'s>,
+pub struct DataCache<'s, S: StateReader> {
+    pub reader: &'s S,
     pub data_map: BTreeMap<AccessPath, Option<Vec<u8>>>,
 }
 
-impl<'s> DataCache<'s> {
-    pub fn new(reader: &'s StateReader<'s>) -> Self {
+impl<'s, S: StateReader> DataCache<'s, S> {
+    pub fn new(reader: &'s S) -> Self {
         Self {
             reader,
             data_map: BTreeMap::default(),
@@ -23,9 +23,7 @@ impl<'s> DataCache<'s> {
     }
 }
 
-// TODO: Create a StateReader trait and implement it here?
-
-impl<'s> ResourceResolver for DataCache<'s> {
+impl<'s, S: StateReader> ResourceResolver for DataCache<'s, S> {
     type Error = anyhow::Error;
 
     fn get_resource(
@@ -39,7 +37,10 @@ impl<'s> ResourceResolver for DataCache<'s> {
     }
 }
 
-impl<'s> ModuleResolver for DataCache<'s> {
+impl<'s, S> ModuleResolver for DataCache<'s, S>
+where
+    S: StateReader,
+{
     type Error = anyhow::Error;
 
     fn get_module(&self, id: &ModuleId) -> Result<Option<Vec<u8>>, Self::Error> {

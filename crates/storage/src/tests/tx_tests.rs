@@ -1,9 +1,11 @@
-use crate::{data_cache::DataCache, db::DB, reader::state::StateReader, stores::state::StateStore};
+use crate::{
+    data_cache::DataCache, db::DB, readers::state::StoreStateReader, stores::state::StateStore,
+};
 use anyhow::{Ok, Result};
 use fabric_types::{
-    authenticator::{Authenticator, MockAuthenticator},
-    raw_transaction::{MoveCall, RawTransaction},
-    signed_transaction::SignedTransaction,
+    auth::authenticator::{Authenticator, MockAuthenticator},
+    transaction::raw_transaction::{MoveCall, RawTransaction},
+    transaction::signed_transaction::SignedTransaction,
 };
 use move_binary_format::CompiledModule;
 use move_compiler::{compiled_unit::AnnotatedCompiledUnit, Compiler};
@@ -39,46 +41,47 @@ fn init() {
     let db = DB::default();
     let state = Arc::new(StateStore::new(db));
 
-    let auth = MockAuthenticator::new(1);
+    let auth_session = MockAuthenticator::validate_credential(&vec![]).unwrap();
+    let addr = auth_session.account().address().clone();
     let module = ModuleId::new(
-        auth.get_address().unwrap(),
+        addr,
         Identifier::from_str("test").unwrap(),
     );
     let function = Identifier::from_str("publish").unwrap();
 
     let move_call = MoveCall::new(module, function, vec![], vec![]);
-    let raw_txn = RawTransaction::new_move_call(bcs::to_bytes(&1).unwrap(), move_call);
+    let raw_txn = RawTransaction::new_move_call(move_call);
 
     // println!("{:#?}", raw_txn);
 
-    let _signed_tx = SignedTransaction::new(raw_txn, auth.clone());
+    let _signed_tx = SignedTransaction::new(auth_session,raw_txn );
     // println!("{:#?}", signed_tx);
 
     let code = CODE.replace(
         "{{ADDR}}",
-        &format!("{}", auth.get_address().unwrap().to_hex_literal()),
+        &format!("{}", addr.to_hex_literal()),
     );
 
     let mut compiled = compile(code).unwrap();
     let unit = get_module(compiled.pop().unwrap());
 
-    let reader = StateReader::new(&state);
+    let reader = StoreStateReader::new(&state);
     let cache = DataCache::new(&reader);
     let mut session = vm.new_session(&cache);
     let mut v = vec![];
     unit.serialize(&mut v).unwrap();
 
     session
-        .publish_module(v, auth.get_address().unwrap(), &mut UnmeteredGasMeter)
+        .publish_module(v, addr, &mut UnmeteredGasMeter)
         .unwrap();
 
     let module = ModuleId::new(
-        auth.get_address().unwrap(),
+        addr,
         Identifier::from_str("test").unwrap(),
     );
     let function = Identifier::from_str("publish").unwrap();
 
-    let signer = MoveValue::Signer(auth.get_address().unwrap())
+    let signer = MoveValue::Signer(addr)
         .simple_serialize()
         .unwrap();
     session

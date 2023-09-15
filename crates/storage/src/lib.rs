@@ -1,6 +1,6 @@
 pub mod data_cache;
 pub mod db;
-pub mod reader;
+pub mod readers;
 pub mod resolver;
 pub mod stores;
 
