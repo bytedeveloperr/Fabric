@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 use anyhow::Result;
-use crate::{auth::authenticator::Authenticator, transaction::raw_transaction::RawTransaction};
+use crate::{transaction::raw_transaction::RawTransaction};
 use crate::auth::auth_session::AuthSession;
 
 #[derive(Debug)]

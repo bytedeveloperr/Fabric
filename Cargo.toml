@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/storage",'crates/types']
+members = ["crates/storage","crates/types", "crates/vm"]
 
 [workspace.dependencies]
 bcs = "0.1.5"

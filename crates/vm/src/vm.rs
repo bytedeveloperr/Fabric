@@ -1,31 +1,23 @@
-use fabric_storage::storage::FabricStorage;
-use move_core_types::account_address::AccountAddress;
+use std::sync::Arc;
+use move_core_types::resolver::{MoveResolver};
 use move_vm_runtime::move_vm::MoveVM;
-use move_vm_types::gas::UnmeteredGasMeter;
+use move_vm_runtime::session::Session;
+use crate::natives::all_natives;
 
 pub struct FabricVM {
-    move_vm: MoveVM,
-    storage: FabricStorage,
+    move_vm: Arc<MoveVM>,
 }
 
 impl FabricVM {
-    pub fn publish_package(&self, tx: Raw) {
-        let sender = AccountAddress::from_hex_literal("0x1").unwrap();
+    pub fn new() -> Self {
+        let move_vm = MoveVM::new(all_natives()).expect("Failure: MoveVM must be able to be created");
 
-        let mut session = self.move_vm.new_session(self.storage.get_resolver());
-        session
-            .publish_module_bundle(vec![], sender, &mut UnmeteredGasMeter)
-            .unwrap();
-
-        let _result = session.finish();
-    }
-}
-
-impl Default for FabricVM {
-    fn default() -> Self {
         Self {
-            storage: FabricStorage::new(),
-            move_vm: MoveVM::new(vec![]).unwrap(),
+            move_vm: Arc::new(move_vm)
         }
+    }
+
+    pub fn new_session<'r, R: MoveResolver>(&self, resolver: &'r R) -> Session<'r, '_, R> {
+        self.move_vm.new_session(resolver)
     }
 }
