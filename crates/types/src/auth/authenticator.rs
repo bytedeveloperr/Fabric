@@ -2,7 +2,8 @@ use std::fmt::Debug;
 
 use anyhow::{Error, Ok};
 use serde::de::DeserializeOwned;
-use crate::auth::auth_session::{AuthSession};
+
+use crate::auth::auth_session::AuthSession;
 
 pub trait Authenticator: Debug + Clone + Sized {
     type Error: Debug;

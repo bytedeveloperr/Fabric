@@ -1,2 +1,2 @@
-pub mod vm;
 pub mod natives;
+pub mod vm;

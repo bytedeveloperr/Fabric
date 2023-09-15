@@ -1,18 +1,21 @@
-use crate::{
-    data_cache::DataCache, db::DB, readers::state::StoreStateReader, stores::state::StateStore,
-};
+use std::{env::temp_dir, fs::File, io::Write, str::FromStr, sync::Arc};
+
 use anyhow::{Ok, Result};
-use fabric_types::{
-    auth::authenticator::{Authenticator, MockAuthenticator},
-    transaction::raw_transaction::{MoveCall, RawTransaction},
-    transaction::signed_transaction::SignedTransaction,
-};
 use move_binary_format::CompiledModule;
 use move_compiler::{compiled_unit::AnnotatedCompiledUnit, Compiler};
 use move_core_types::{identifier::Identifier, language_storage::ModuleId, value::MoveValue};
 use move_vm_runtime::move_vm::MoveVM;
 use move_vm_types::gas::UnmeteredGasMeter;
-use std::{env::temp_dir, fs::File, io::Write, str::FromStr, sync::Arc};
+
+use fabric_types::{
+    auth::authenticator::{Authenticator, MockAuthenticator},
+    transaction::raw_transaction::{MoveCall, RawTransaction},
+    transaction::signed_transaction::SignedTransaction,
+};
+
+use crate::{
+    data_cache::DataCache, db::DB, readers::state::StoreStateReader, stores::state::StateStore,
+};
 
 const CODE: &'static str = r#"
     module {{ADDR}}::test {
@@ -43,10 +46,7 @@ fn init() {
 
     let auth_session = MockAuthenticator::validate_credential(&vec![]).unwrap();
     let addr = auth_session.account().address().clone();
-    let module = ModuleId::new(
-        addr,
-        Identifier::from_str("test").unwrap(),
-    );
+    let module = ModuleId::new(addr, Identifier::from_str("test").unwrap());
     let function = Identifier::from_str("publish").unwrap();
 
     let move_call = MoveCall::new(module, function, vec![], vec![]);
@@ -54,13 +54,10 @@ fn init() {
 
     // println!("{:#?}", raw_txn);
 
-    let _signed_tx = SignedTransaction::new(auth_session,raw_txn );
+    let _signed_tx = SignedTransaction::new(auth_session, raw_txn);
     // println!("{:#?}", signed_tx);
 
-    let code = CODE.replace(
-        "{{ADDR}}",
-        &format!("{}", addr.to_hex_literal()),
-    );
+    let code = CODE.replace("{{ADDR}}", &format!("{}", addr.to_hex_literal()));
 
     let mut compiled = compile(code).unwrap();
     let unit = get_module(compiled.pop().unwrap());
@@ -75,15 +72,10 @@ fn init() {
         .publish_module(v, addr, &mut UnmeteredGasMeter)
         .unwrap();
 
-    let module = ModuleId::new(
-        addr,
-        Identifier::from_str("test").unwrap(),
-    );
+    let module = ModuleId::new(addr, Identifier::from_str("test").unwrap());
     let function = Identifier::from_str("publish").unwrap();
 
-    let signer = MoveValue::Signer(addr)
-        .simple_serialize()
-        .unwrap();
+    let signer = MoveValue::Signer(addr).simple_serialize().unwrap();
     session
         .execute_entry_function(
             &module,

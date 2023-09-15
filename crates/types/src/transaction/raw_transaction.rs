@@ -6,8 +6,7 @@ use move_core_types::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    auth::authenticator::Authenticator,
-    transaction::signed_transaction::SignedTransaction,
+    auth::authenticator::Authenticator, transaction::signed_transaction::SignedTransaction,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -6,7 +6,7 @@ pub enum Identifier {
     U32(u32),
     U64(u64),
     String(String),
-    Custom(Vec<u8>)
+    Custom(Vec<u8>),
 }
 
 impl Identifier {
@@ -63,7 +63,7 @@ impl From<Identifier> for u32 {
     fn from(value: Identifier) -> Self {
         match value {
             Identifier::U32(value) => value,
-            _ => panic!("Error: Identifier must be of type u32")
+            _ => panic!("Error: Identifier must be of type u32"),
         }
     }
 }
@@ -72,7 +72,7 @@ impl From<Identifier> for u64 {
     fn from(value: Identifier) -> Self {
         match value {
             Identifier::U64(value) => value,
-            _ => panic!("Error: Identifier must be of type u64")
+            _ => panic!("Error: Identifier must be of type u64"),
         }
     }
 }
@@ -81,7 +81,7 @@ impl From<Identifier> for String {
     fn from(value: Identifier) -> Self {
         match value {
             Identifier::String(value) => value,
-            _ => panic!("Error: Identifier must be of type String")
+            _ => panic!("Error: Identifier must be of type String"),
         }
     }
 }
@@ -99,7 +99,7 @@ impl From<Identifier> for Vec<u8> {
 
 impl Display for Identifier {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-         match self {
+        match self {
             Identifier::U32(value) => writeln!(f, "{}", value),
             Identifier::U64(value) => writeln!(f, "{}", value),
             Identifier::String(value) => writeln!(f, "{}", value),

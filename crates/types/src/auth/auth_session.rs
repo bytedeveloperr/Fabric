@@ -1,11 +1,12 @@
 use move_core_types::account_address::AccountAddress;
+
 use crate::identifier::Identifier;
 
 #[derive(Debug)]
 pub struct AuthSession {
     expires_at: u64,
     metadata: Option<Vec<u8>>,
-    account: AuthSessionAccount
+    account: AuthSessionAccount,
 }
 
 #[derive(Clone, Debug)]
@@ -15,11 +16,11 @@ pub struct AuthSessionAccount {
 }
 
 impl AuthSession {
-    pub fn new(expires_at: u64, account: AuthSessionAccount, metadata: Option<Vec<u8>>) -> Self{
+    pub fn new(expires_at: u64, account: AuthSessionAccount, metadata: Option<Vec<u8>>) -> Self {
         Self {
             expires_at,
             account,
-            metadata
+            metadata,
         }
     }
 
@@ -34,7 +35,10 @@ impl AuthSession {
 
 impl AuthSessionAccount {
     pub fn new(address: AccountAddress, identifier: Identifier) -> Self {
-        Self { address, identifier }
+        Self {
+            address,
+            identifier,
+        }
     }
 
     pub fn address(&self) -> &AccountAddress {
@@ -48,7 +52,11 @@ impl AuthSessionAccount {
 
 impl Default for AuthSession {
     fn default() -> Self {
-        Self { expires_at: 0, account: AuthSessionAccount::default(), metadata: None }
+        Self {
+            expires_at: 0,
+            account: AuthSessionAccount::default(),
+            metadata: None,
+        }
     }
 }
 
@@ -56,8 +64,7 @@ impl Default for AuthSessionAccount {
     fn default() -> Self {
         Self {
             address: AccountAddress::random(),
-            identifier: Identifier::u64(0)
+            identifier: Identifier::u64(0),
         }
     }
 }
-
