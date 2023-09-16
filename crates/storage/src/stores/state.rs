@@ -27,7 +27,7 @@ impl StateStore {
             let mut account_state = AccountState::try_from(&raw_account)?;
 
             let (modules, resources) = account_change_set.into_inner();
-            account_state.insert_modules(address, modules)?;
+            account_state.insert_modules(modules)?;
             account_state.insert_resources(resources)?;
         }
 

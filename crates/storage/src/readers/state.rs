@@ -4,9 +4,10 @@ use std::{
 };
 
 use anyhow::{Ok, Result};
-use fabric_types::{access_path::AccessPath, account_state::AccountState};
 use move_core_types::account_address::AccountAddress;
 use parking_lot::RwLock;
+
+use fabric_types::{access_path::AccessPath, account_state::AccountState};
 
 use crate::stores::{state::StateStore, Store};
 
@@ -41,7 +42,7 @@ impl<'s> StateReader for StoreStateReader<'s> {
         let account = raw_account
             .map(|account| AccountState::try_from(&account))
             .transpose()?
-            .unwrap_or_default();
+            .unwrap_or(AccountState::new(address));
 
         let value = match self.accounts_cache.write().entry(address) {
             Entry::Occupied(value) => value.get().get(path).cloned(),

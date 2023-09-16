@@ -1,14 +1,15 @@
 use std::{str::FromStr, sync::Arc};
 
-use fabric_types::{
-    access_path::AccessPath, account_state::AccountState, raw_account_state::RawAccountState,
-};
 use move_core_types::{
     account_address::AccountAddress,
     language_storage::{ResourceKey, StructTag},
     resolver::ResourceResolver,
 };
 use serde::{Deserialize, Serialize};
+
+use fabric_types::{
+    access_path::AccessPath, account_state::AccountState, raw_account_state::RawAccountState,
+};
 
 use crate::{
     db::DB,
@@ -36,10 +37,10 @@ fn init() {
     let db = DB::default();
     let state = Arc::new(StateStore::new(db));
     let resolver = StateResolver::new(state.clone());
-    let mut account_state = AccountState::default();
 
     let struct_tag = StructTag::from_str(TYPE_NAME).unwrap();
     let address = AccountAddress::random();
+    let mut account_state = AccountState::new(address);
 
     let resource = ResourceKey::new(address, struct_tag.clone());
     let access_path = AccessPath::from(resource);

@@ -10,30 +10,36 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 use crate::{access_path::Path, raw_account_state::RawAccountState};
 
-#[derive(Debug, Default, Serialize, Deserialize)]
-pub struct AccountState(BTreeMap<Vec<u8>, Vec<u8>>);
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AccountState {
+    address: AccountAddress,
+    data: BTreeMap<Vec<u8>, Vec<u8>>,
+}
 
 pub trait AccountChanges {
-    fn insert_modules(
-        &mut self,
-        address: AccountAddress,
-        modules: BTreeMap<Identifier, Op<Vec<u8>>>,
-    ) -> Result<()>;
+    fn insert_modules(&mut self, modules: BTreeMap<Identifier, Op<Vec<u8>>>) -> Result<()>;
 
     fn insert_resources(&mut self, resources: BTreeMap<StructTag, Op<Vec<u8>>>) -> Result<()>;
 }
 
 impl AccountState {
+    pub fn new(address: AccountAddress) -> Self {
+        Self {
+            address,
+            data: BTreeMap::new(),
+        }
+    }
+
     pub fn insert(&mut self, key: Vec<u8>, value: Vec<u8>) -> Option<Vec<u8>> {
-        self.0.insert(key, value)
+        self.data.insert(key, value)
     }
 
     pub fn get(&self, key: &[u8]) -> Option<&Vec<u8>> {
-        self.0.get(key)
+        self.data.get(key)
     }
 
     pub fn remove(&mut self, key: &[u8]) -> Option<Vec<u8>> {
-        self.0.remove(key)
+        self.data.remove(key)
     }
 
     pub fn get_resource<T: MoveResource>(&self) -> Result<Option<T>> {
@@ -41,7 +47,7 @@ impl AccountState {
     }
 
     pub fn get_modules(&self) -> impl Iterator<Item = &Vec<u8>> {
-        self.0
+        self.data
             .iter()
             .filter_map(|(k, v)| match Path::try_from(k).expect("msg") {
                 Path::Resource(_) => None,
@@ -50,7 +56,7 @@ impl AccountState {
     }
 
     pub fn get_resources(&self) -> impl Iterator<Item = (StructTag, &[u8])> {
-        self.0
+        self.data
             .iter()
             .filter_map(|(k, v)| match Path::try_from(k).expect("msg") {
                 Path::Resource(t) => Some((t, v.as_ref())),
@@ -59,7 +65,7 @@ impl AccountState {
     }
 
     pub fn get_resource_impl<T: DeserializeOwned>(&self, key: &[u8]) -> Result<Option<T>> {
-        self.0
+        self.data
             .get(key)
             .map(|value| bcs::from_bytes(value))
             .transpose()
@@ -96,13 +102,9 @@ impl TryFrom<RawAccountState> for AccountState {
 }
 
 impl AccountChanges for AccountState {
-    fn insert_modules(
-        &mut self,
-        address: AccountAddress,
-        modules: BTreeMap<Identifier, Op<Vec<u8>>>,
-    ) -> Result<()> {
+    fn insert_modules(&mut self, modules: BTreeMap<Identifier, Op<Vec<u8>>>) -> Result<()> {
         for (id, operation) in modules.into_iter() {
-            let module_id = ModuleId::new(address, id).access_vector();
+            let module_id = ModuleId::new(self.address, id).access_vector();
 
             match operation {
                 Op::New(code) | Op::Modify(code) => {
