@@ -1,8 +1,14 @@
-use super::{KeyCodec, Store, ValueCodec};
-use crate::db::DB;
-use fabric_types::raw_account_state::RawAccountState;
-use move_core_types::account_address::AccountAddress;
 use std::sync::Arc;
+
+use move_core_types::account_address::AccountAddress;
+use move_core_types::effects::ChangeSet;
+
+use fabric_types::account_state::{AccountChanges, AccountState};
+use fabric_types::raw_account_state::RawAccountState;
+
+use crate::db::DB;
+
+use super::{KeyCodec, Store, ValueCodec};
 
 pub struct StateStore {
     db: Arc<DB>,
@@ -11,6 +17,21 @@ pub struct StateStore {
 impl StateStore {
     pub fn new(db: DB) -> Self {
         Self { db: Arc::new(db) }
+    }
+
+    pub fn apply_change_set(&self, change_set: ChangeSet) -> anyhow::Result<()> {
+        let accounts_change_set = change_set.into_inner();
+
+        for (address, account_change_set) in accounts_change_set.into_iter() {
+            let raw_account = self.get(&address)?.unwrap_or(RawAccountState::default());
+            let mut account_state = AccountState::try_from(&raw_account)?;
+
+            let (modules, resources) = account_change_set.into_inner();
+            account_state.insert_modules(address, modules)?;
+            account_state.insert_resources(resources)?;
+        }
+
+        Ok(())
     }
 }
 

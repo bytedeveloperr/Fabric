@@ -1,0 +1,22 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+fabric-storage = { path = "../storage" }
+fabric-types = { path = "../types" }
+fabric-vm = { path = "../vm" }
+anyhow = "1.0.75"
+lazy_static = "1.4.0"
+
+bcs.workspace = true
+move-binary-format.workspace = true
+move-vm-runtime.workspace = true
+move-core-types.workspace = true
+move-vm-types.workspace = true
+move-compiler.workspace = true
+move-stdlib.workspace = true
+serde.workspace = true

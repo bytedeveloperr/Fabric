@@ -1,12 +1,27 @@
+use std::collections::BTreeMap;
+
 use anyhow::Result;
+use move_core_types::account_address::AccountAddress;
+use move_core_types::effects::Op;
+use move_core_types::identifier::Identifier;
+use move_core_types::language_storage::ModuleId;
 use move_core_types::{language_storage::StructTag, move_resource::MoveResource};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
-use std::collections::BTreeMap;
 
 use crate::{access_path::Path, raw_account_state::RawAccountState};
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct AccountState(BTreeMap<Vec<u8>, Vec<u8>>);
+
+pub trait AccountChanges {
+    fn insert_modules(
+        &mut self,
+        address: AccountAddress,
+        modules: BTreeMap<Identifier, Op<Vec<u8>>>,
+    ) -> Result<()>;
+
+    fn insert_resources(&mut self, resources: BTreeMap<StructTag, Op<Vec<u8>>>) -> Result<()>;
+}
 
 impl AccountState {
     pub fn insert(&mut self, key: Vec<u8>, value: Vec<u8>) -> Option<Vec<u8>> {
@@ -69,5 +84,53 @@ impl TryFrom<&RawAccountState> for AccountState {
 
     fn try_from(value: &RawAccountState) -> Result<Self, Self::Error> {
         bcs::from_bytes(&value.state)
+    }
+}
+
+impl TryFrom<RawAccountState> for AccountState {
+    type Error = bcs::Error;
+
+    fn try_from(value: RawAccountState) -> Result<Self, Self::Error> {
+        Self::try_from(&value)
+    }
+}
+
+impl AccountChanges for AccountState {
+    fn insert_modules(
+        &mut self,
+        address: AccountAddress,
+        modules: BTreeMap<Identifier, Op<Vec<u8>>>,
+    ) -> Result<()> {
+        for (id, operation) in modules.into_iter() {
+            let module_id = ModuleId::new(address, id).access_vector();
+
+            match operation {
+                Op::New(code) | Op::Modify(code) => {
+                    self.insert(module_id.clone(), code.clone());
+                }
+                Op::Delete => {
+                    self.remove(&module_id);
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn insert_resources(&mut self, resources: BTreeMap<StructTag, Op<Vec<u8>>>) -> Result<()> {
+        for (tag, operation) in resources.into_iter() {
+            let tag = tag.access_vector();
+
+            match operation {
+                Op::New(content) | Op::Modify(content) => {
+                    self.insert(tag, content.clone());
+                }
+                Op::Delete => {
+                    self.remove(&tag);
+                }
+            }
+        }
+
+        Ok(())
     }
 }
