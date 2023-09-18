@@ -1,0 +1,7 @@
+[package]
+name = "Fabric"
+
+[dependencies]
+
+[addresses]
+fabric = "0x2"

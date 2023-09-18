@@ -1099,8 +1099,10 @@ dependencies = [
 name = "fabric-vm"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
     "bcs",
     "fabric-storage",
+ "fabric-types",
     "move-core-types",
     "move-stdlib",
     "move-vm-runtime",

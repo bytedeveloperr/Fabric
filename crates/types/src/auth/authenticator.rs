@@ -10,11 +10,9 @@ pub trait Authenticator: Debug + Clone + Sized {
 
     type Credential: Clone + Debug + DeserializeOwned;
 
-    // fn check(&self) -> Result<bool, Self::Error>;
+    fn check(&self) -> Result<bool, Self::Error>;
 
     fn validate_credential(credential: &Self::Credential) -> Result<AuthSession, Self::Error>;
-
-    // fn invalidate_credential(&self) -> Result<(), Self::Error>;
 }
 
 #[derive(Debug, Clone)]
@@ -25,15 +23,11 @@ impl Authenticator for MockAuthenticator {
 
     type Credential = Vec<u8>;
 
-    // fn check(&self) -> Result<bool, Self::Error> {
-    //     Ok(self.is_valid)
-    // }
+    fn check(&self) -> Result<bool, Self::Error> {
+        Ok(true)
+    }
 
     fn validate_credential(_credential: &Self::Credential) -> Result<AuthSession, Self::Error> {
         Ok(AuthSession::default())
     }
-
-    // fn invalidate_credential(&self) -> Result<(), Self::Error> {
-    //     Ok(())
-    // }
 }

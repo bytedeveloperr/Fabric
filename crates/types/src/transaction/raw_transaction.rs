@@ -6,7 +6,7 @@ use move_core_types::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    auth::authenticator::Authenticator, transaction::signed_transaction::SignedTransaction,
+    auth::authenticator::Authenticator, transaction::verified_transaction::VerifiedTransaction,
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -92,13 +92,11 @@ impl RawTransaction {
         &self.payload
     }
 
-    pub fn to_signed<Auth: Authenticator>(
+    pub fn verify<Auth: Authenticator>(
         self,
         credential: &Auth::Credential,
-    ) -> Result<SignedTransaction> {
+    ) -> Result<VerifiedTransaction> {
         let identity = Auth::validate_credential(credential).unwrap();
-        // TODO: Prevent double TX
-
-        Ok(SignedTransaction::new(identity, self))
+        Ok(VerifiedTransaction::new(identity, self))
     }
 }

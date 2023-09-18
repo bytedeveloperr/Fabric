@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 fabric-storage = { path = "../storage" }
+fabric-types = { path = "../types" }
 
 bcs.workspace = true
+anyhow.workspace = true
 move-vm-runtime.workspace = true
 move-core-types.workspace = true
 move-vm-types.workspace = true

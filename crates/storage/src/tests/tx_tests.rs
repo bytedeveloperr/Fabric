@@ -10,7 +10,7 @@ use move_vm_types::gas::UnmeteredGasMeter;
 use fabric_types::{
     auth::authenticator::{Authenticator, MockAuthenticator},
     transaction::raw_transaction::{MoveCall, RawTransaction},
-    transaction::signed_transaction::SignedTransaction,
+    transaction::verified_transaction::VerifiedTransaction,
 };
 
 use crate::{
@@ -54,7 +54,7 @@ fn init() {
 
     // println!("{:#?}", raw_txn);
 
-    let _signed_tx = SignedTransaction::new(auth_session, raw_txn);
+    let _signed_tx = VerifiedTransaction::new(auth_session, raw_txn);
     // println!("{:#?}", signed_tx);
 
     let code = CODE.replace("{{ADDR}}", &format!("{}", addr.to_hex_literal()));
